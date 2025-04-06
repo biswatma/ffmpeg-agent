@@ -5,144 +5,275 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FFmpeg Agent</title>
     <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --danger-color: #dc3545;
+            --light-gray: #f8f9fa;
+            --medium-gray: #dee2e6;
+            --dark-gray: #343a40;
+            --text-color: #495057;
+            --border-radius: 0.375rem; /* Slightly larger radius */
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
         body {
-            font-family: sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 30px;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            line-height: 1.6;
             box-sizing: border-box;
         }
+
         .main-container {
             display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
             gap: 30px;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto;
         }
+
         .form-container, .preview-container {
             background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 35px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             flex: 1;
+            min-width: 300px; /* Prevent excessive shrinking */
         }
-        h1 {
+
+        h1, h2 {
             text-align: center;
-            color: #333;
+            color: var(--dark-gray);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+
+        .form-group {
             margin-bottom: 25px;
         }
-        .form-group {
-            margin-bottom: 20px;
-        }
+
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark-gray);
         }
+
         input[type="file"],
         textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 15px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
             box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
+        input[type="file"] {
+            padding: 8px 15px; /* Adjust padding for file input */
+        }
+        input[type="file"]::file-selector-button { /* Style file input button */
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+        input[type="file"]::file-selector-button:hover {
+             background-color: #5a6268;
+        }
+
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 120px;
         }
+        input[type="file"]:focus,
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
         button {
-            background-color: #007bff;
             color: white;
-            padding: 10px 15px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.1s ease;
             margin-right: 10px;
             margin-bottom: 10px;
         }
         button:hover {
-            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0px);
         }
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
+            transform: none;
         }
+
         #submit-button {
+            background-color: var(--primary-color);
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
+        #submit-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .sample-commands {
+            margin: 25px 0;
+            padding-top: 15px;
+            border-top: 1px solid var(--medium-gray);
+        }
+        .sample-commands h3 {
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .sample-command {
+             background-color: var(--secondary-color);
+        }
+         .sample-command:hover {
+             background-color: #5a6268;
+        }
+
         #status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-            font-weight: bold;
+            margin-top: 25px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
             text-align: center;
+            display: none; /* Hide by default */
+        }
+        #status.visible {
+            display: block;
         }
         #status.success {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #e9f7ef;
+            color: var(--success-color);
             border: 1px solid #c3e6cb;
         }
         #status.error {
-            background-color: #f8d7da;
-            color: #721c24;
+            background-color: #fdecea;
+            color: var(--danger-color);
             border: 1px solid #f5c6cb;
         }
-        #result {
-            margin-top: 15px;
-        }
+
         .result-link {
             display: inline-block;
-            background-color: #28a745;
+            background-color: var(--success-color);
             color: white;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
             text-decoration: none;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
         .result-link:hover {
-            background-color: #218838;
+            background-color: var(--success-hover);
+            transform: translateY(-1px);
         }
+
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            border-left-color: #007bff;
-            animation: spin 1s ease infinite;
-            margin: 20px auto;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite; /* Changed timing function */
+            margin: 25px auto 0;
             display: none;
         }
-        .sample-commands {
-            margin: 15px 0;
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--medium-gray);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 25px auto 0;
+            height: 10px; /* Slimmer bar */
+            display: none; /* Hide by default */
         }
-        .sample-commands h3 {
-            margin-bottom: 10px;
-            color: #555;
+        .progress-bar {
+            width: 100%; /* Full width for indeterminate */
+            height: 100%;
+            background-color: var(--primary-color);
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: progress-bar-stripes 1s linear infinite;
         }
+
         .preview-box {
-            border: 1px dashed #ccc;
-            min-height: 200px;
+            border: 1px solid var(--medium-gray); /* Solid border */
+            min-height: 250px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
+            margin-bottom: 20px;
+            background-color: #fff; /* White background */
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden; /* Ensure content fits */
         }
-        .preview-box img {
+        .preview-box p { /* Placeholder text style */
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+        .preview-box img, .preview-box video {
             max-width: 100%;
-            max-height: 300px;
+            max-height: 350px; /* Increased max height */
+            border-radius: calc(var(--border-radius) - 2px); /* Inner radius */
+            object-fit: contain; /* Ensure aspect ratio is maintained */
         }
+
         .download-section {
             text-align: center;
+            margin-top: 20px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        @keyframes progress-bar-stripes {
+            from { background-position: 1rem 0; }
+            to { background-position: 0 0; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            body {
+                padding: 15px;
+            }
+            .form-container, .preview-container {
+                padding: 25px;
+            }
         }
     </style>
 </head>
@@ -170,8 +301,12 @@
                 <button type="submit" id="submit-button">Process Media</button>
             </form>
             <div class="spinner" id="loading-spinner"></div>
+            <!-- Progress Bar -->
+            <div class="progress-bar-container" id="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
             <div id="status"></div>
-            <div id="result"></div>
+            <!-- Removed result div as status is sufficient -->
         </div>
 
         <div class="preview-container">
@@ -212,7 +347,8 @@
             previewBox.innerHTML = '<p>Processing...</p>';
             downloadLink.style.display = 'none';
             submitButton.disabled = true;
-            loadingSpinner.style.display = 'block';
+            loadingSpinner.style.display = 'none'; // Hide spinner initially
+            document.getElementById('progress-bar-container').style.display = 'block'; // Show progress bar
 
             try {
                 const response = await fetch('/process', {
@@ -275,7 +411,8 @@
                 previewBox.innerHTML = '<p>Error processing file</p>';
             } finally {
                 submitButton.disabled = false;
-                loadingSpinner.style.display = 'none';
+                loadingSpinner.style.display = 'none'; // Ensure spinner is hidden
+                document.getElementById('progress-bar-container').style.display = 'none'; // Hide progress bar
             }
         });
     </script>
