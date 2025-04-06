@@ -1,0 +1,22 @@
+# Environment variables
+.env
+
+# Uploaded files
+uploads/
+
+# Processed output files
+output/
+
+# Python cache/build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+build/
+dist/
+*.egg-info/
+venv/
+.venv/
+
+# macOS specific
+.DS_Store
